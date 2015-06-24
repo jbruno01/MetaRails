@@ -15,8 +15,12 @@ module Phase5
       @params = {}
       # byebug
       query = req.query_string
-      parse_www_encoded_form(query) unless query.nil?
-      @params
+      body = req.body
+      return {} if query.nil? && body.nil?
+      query.nil? ? query_params = {} : query_params = parse_www_encoded_form(query)
+      body.nil? ? body_params = {} : body_params = parse_www_encoded_form(body)
+
+      @params = query_params.merge!(body_params)
     end
 
     def [](key)
@@ -38,14 +42,35 @@ module Phase5
     # { "user" => { "address" => { "street" => "main", "zip" => "89436" } } }
     def parse_www_encoded_form(www_encoded_form)
       decoded = URI::decode_www_form(www_encoded_form)
+      final_hash = {}
       decoded.each do |key, val|
-        params[key] = val
+        keys = parse_key(key)
+        current_hash = nil
+
+        keys.each_with_index do |keyx, ind|
+          if keys.length == 1
+            final_hash[keyx] = val
+            break
+          end
+
+          if ind == 0
+            final_hash[keyx] ||= {}
+            current_hash = final_hash[keyx]
+          elsif ind == keys.length - 1
+            current_hash[keyx] = val
+          else
+            current_hash[keyx] ||= {}
+            current_hash = current_hash[keyx]
+          end
+        end
       end
+      final_hash
     end
 
     # this should return an array
     # user[address][street] should return ['user', 'address', 'street']
     def parse_key(key)
+      key.split(/\]\[|\[|\]/)
     end
   end
 end
