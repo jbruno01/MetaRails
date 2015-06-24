@@ -16,15 +16,15 @@ module Phase5
       # byebug
       query = req.query_string
       body = req.body
-      return {} if query.nil? && body.nil?
+      return {} if query.nil? && body.nil? && route_params.nil?
       query.nil? ? query_params = {} : query_params = parse_www_encoded_form(query)
       body.nil? ? body_params = {} : body_params = parse_www_encoded_form(body)
 
-      @params = query_params.merge!(body_params)
+      @params = query_params.merge!(body_params).merge!(route_params)
     end
 
     def [](key)
-      @params[key]
+      @params[key.to_s]
     end
 
     # this will be useful if we want to `puts params` in the server log
