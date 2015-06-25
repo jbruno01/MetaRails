@@ -18,8 +18,8 @@ module Phase2
       if already_built_response?
         raise ExceptionError
       else
-        res.status = 302
-        res.header["location"] = url
+        @res.status = 302
+        @res["location"] = url
         @already_built_response = true
       end
     end
@@ -31,8 +31,8 @@ module Phase2
       if already_built_response?
         raise ExceptionError
       else
-        res.body = content
-        res.content_type = content_type
+        @res.body = content
+        @res.content_type = content_type
         @already_built_response = true
       end
     end
